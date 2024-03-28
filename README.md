@@ -38,35 +38,35 @@ We'll be looking at a bunch of things to see how awesome your work is, like:
 
 **Dataset description**: [Diamonds Readme](./datasets/diamonds/README.md)
 
-Meet Don Francesco, the mystery-shrouded, fabulously wealthy owner of a jewelry empire. 
+Meet Don Francesco, the mystery-shrouded, fabulously wealthy owner of a jewelry empire.
 
-He's got an impressive collection of 5000 diamonds and a temperament to match - so let's keep him smiling, shall we? 
-In our dataset, you'll find all the glittery details of these gems, from size to sparkle, along with their values 
+He's got an impressive collection of 5000 diamonds and a temperament to match - so let's keep him smiling, shall we?
+In our dataset, you'll find all the glittery details of these gems, from size to sparkle, along with their values
 appraised by an expert. You can assume that the expert's valuations are in line with the real market value of the stones.
 
 #### Challenge 1
 
-Plot twist! The expert who priced these gems has now vanished. 
-Francesco needs you to be the new diamond evaluator. 
-He's looking for a **model that predicts a gem's worth based on its characteristics**. 
-And, because Francesco's clientele is as demanding as he is, he wants the why behind every price tag. 
+Plot twist! The expert who priced these gems has now vanished.
+Francesco needs you to be the new diamond evaluator.
+He's looking for a **model that predicts a gem's worth based on its characteristics**.
+And, because Francesco's clientele is as demanding as he is, he wants the why behind every price tag.
 
 Create another Jupyter notebook where you develop and evaluate your model.
 
 #### Challenge 2
 
-Good news! Francesco is impressed with the performance of your model. 
-Now, he's ready to hire a new expert and expand his diamond database. 
+Good news! Francesco is impressed with the performance of your model.
+Now, he's ready to hire a new expert and expand his diamond database.
 
-**Develop an automated pipeline** that trains your model with fresh data, 
+**Develop an automated pipeline** that trains your model with fresh data,
 keeping it as sharp as the diamonds it assesses.
 
 #### Challenge 3
 
-Finally, Francesco wants to bring your brilliance to his business's fingertips. 
+Finally, Francesco wants to bring your brilliance to his business's fingertips.
 
-**Build a REST API** to integrate your model into a web app, 
-making it a cinch for his team to use. 
+**Build a REST API** to integrate your model into a web app,
+making it a cinch for his team to use.
 Keep it developer-friendly – after all, not everyone speaks 'data scientist'!
 
 #### Challenge 4
@@ -82,4 +82,6 @@ So, ready to add some sparkle to this challenge? Let's make these diamonds shine
 ---
 
 ## How to run
+![Iguana](assets/iguana-1489682573Qj6-rescaled.jpg)
+
 Please fill this section as part of the assignment.
