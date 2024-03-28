@@ -28,3 +28,10 @@ def test_cut_grades_encoder():
         np.array(data.CUT_GRADES).reshape(-1, 1))
 
     assert (cut_column[:, 0] == range(6)).all()
+
+
+def test_color_encoder():
+    color_column = data.color_encoder.fit_transform(
+        np.array(data.COLORS).reshape(-1, 1))
+
+    assert (color_column[:, 0] == range(23)).all()
