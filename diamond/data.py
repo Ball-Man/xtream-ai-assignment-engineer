@@ -7,6 +7,8 @@ from sklearn.preprocessing import OrdinalEncoder
 
 CUT_GRADES = 'Poor', 'Fair', 'Good', 'Very Good', 'Premium', 'Ideal'
 COLORS = tuple(ascii_uppercase[3:])
+CLARITIES = ('FL', 'IF', 'VVS1', 'VVS2', 'VS1', 'VS2', 'SI1',  'SI2', 'I1', 'I2',
+             'I3')
 
 
 def load_raw(file_or_path) -> pd.DataFrame:
@@ -19,3 +21,6 @@ cut_grades_encoder = OrdinalEncoder(categories=[list(CUT_GRADES)],
 
 color_encoder = OrdinalEncoder(categories=[list(COLORS)],
                                dtype=np.float32)
+
+clarity_encoder = OrdinalEncoder(categories=[list(CLARITIES)],
+                                 dtype=np.float32)

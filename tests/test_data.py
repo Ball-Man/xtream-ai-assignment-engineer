@@ -35,3 +35,10 @@ def test_color_encoder():
         np.array(data.COLORS).reshape(-1, 1))
 
     assert (color_column[:, 0] == range(23)).all()
+
+
+def test_clarity_encoder():
+    color_column = data.clarity_encoder.fit_transform(
+        np.array(data.CLARITIES).reshape(-1, 1))
+
+    assert (color_column[:, 0] == range(11)).all()
