@@ -17,6 +17,5 @@ def load_raw(file_or_path) -> pd.DataFrame:
 cut_grades_encoder = OrdinalEncoder(categories=[list(CUT_GRADES)],
                                     dtype=np.float32)
 
-
 color_encoder = OrdinalEncoder(categories=[list(COLORS)],
                                dtype=np.float32)
