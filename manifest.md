@@ -18,3 +18,9 @@ A simple pipeline may be developed in Python from scratch. When possible, **pyte
 The project will make use of jupyter notebooks for quick and readable development, especially for the first challenges (data analysis, model development). Overall the project will cover all the challenges, but not necessarily in an explicit way (e.g., not necessarily one notebook per challenge, etc.).
 
 Most of the code will however reside in a properly formed python package, which will act as codebase for the entire project, the `diamond` package. Notebooks would then import the package and use the provided functionality. Ideally, all prototyped code will iteratively move from the notebooks to the codebase, leaving only high level scripting and visualization code on the notebooks.
+
+### Code style
+All the code shall be styled following PEP8[^1] and PEP257[^2] as much as possible.
+
+[^1]: https://peps.python.org/pep-0008/
+[^2]: https://peps.python.org/pep-0257/
