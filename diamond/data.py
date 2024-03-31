@@ -109,3 +109,21 @@ class VolumeFeatureExtractor(_FeatureExtractor):
     def extract(self, X: pd.DataFrame) -> pd.Series:
         """Extract and return the volume feature."""
         return X.x * X.y * X.z
+
+
+class EccentricityFeatureExtractor(_FeatureExtractor):
+    r"""Transformer, extract eccentricity feature of diamonds.
+
+    ``x``, ``y`` features are required. Formally the feature is defined
+    as:
+
+    :math:`e = \sqrt{1 - \frac{b}{a}},\quad a = \max{(a, b)}, b = \min{(a, b)}`
+    """
+
+    def __init__(self, extracted_feature_name: str = 'eccentricity'):
+        super().__init__(extracted_feature_name)
+
+    def extract(self, X: pd.DataFrame) -> pd.Series:
+        """Extract and return the volume feature."""
+        return np.sqrt(1. - X[['x', 'y']].min(axis=1)
+                       / X[['x', 'y']].max(axis=1))

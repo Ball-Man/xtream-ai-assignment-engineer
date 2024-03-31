@@ -93,3 +93,22 @@ class TestVolumeFeatureExtractor:
         assert (extracted >= clean_dataframe.x).all()
         assert (extracted >= clean_dataframe.y).all()
         assert (extracted >= clean_dataframe.z).all()
+
+
+class TestEccentricityFeatureExtractor:
+
+    @pytest.mark.parametrize('input_name, expected', (('x', 'x'),
+                                                      (None, 'eccentricity')))
+    def test_init(self, input_name, expected):
+        if input_name is None:
+            extractor = data.EccentricityFeatureExtractor()
+        else:
+            extractor = data.EccentricityFeatureExtractor(expected)
+
+        assert extractor.extracted_feature_name == expected
+
+    def test_extract(self, clean_dataframe):
+        extractor = data.EccentricityFeatureExtractor()
+        extracted = extractor.extract(clean_dataframe)
+
+        assert extracted.between(0, 1).all()
