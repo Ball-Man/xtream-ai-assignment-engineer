@@ -26,6 +26,12 @@ def raw_dataframe(raw_filename) -> pd.DataFrame:
     return data.load_raw(raw_filename)
 
 
+@pytest.fixture
+def clean_dataframe(raw_filename) -> pd.DataFrame:
+    """Pytest fixture: load unprocessed dataframe."""
+    return data.clean(data.load_raw(raw_filename))
+
+
 def test_load_raw(raw_filename):
     df = data.load_raw(raw_filename)
     assert (df.count() > 0).all()
@@ -81,9 +87,9 @@ class TestVolumeFeatureExtractor:
 
         assert extractor.extracted_feature_name == expected
 
-    def test_extract(self, raw_dataframe):
+    def test_extract(self, clean_dataframe):
         extractor = data.VolumeFeatureExtractor()
-        extracted = extractor.extract(raw_dataframe)
-        assert (extracted >= raw_dataframe.x).all()
-        assert (extracted >= raw_dataframe.y).all()
-        assert (extracted >= raw_dataframe.z).all()
+        extracted = extractor.extract(clean_dataframe)
+        assert (extracted >= clean_dataframe.x).all()
+        assert (extracted >= clean_dataframe.y).all()
+        assert (extracted >= clean_dataframe.z).all()
