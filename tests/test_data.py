@@ -31,6 +31,16 @@ def test_load_raw(raw_filename):
     assert (df.count() > 0).all()
 
 
+@pytest.mark.parametrize('ranges_dict', ({}, {'x': (4., 5., 'both')},
+                                             {'y': (4., np.inf, 'left')}))
+def test_clean(raw_dataframe, ranges_dict):
+    clean_df = data.clean(raw_dataframe, ranges_dict)
+
+    for name, (min_, max_, inclusive) in ranges_dict.items():
+        assert (clean_df[name] < min_).sum() == 0
+        assert (clean_df[name] > max_).sum() == 0
+
+
 def test_cut_grades_encoder():
     cut_column = data.cut_grades_encoder.fit_transform(
         np.array(data.CUT_GRADES).reshape(-1, 1))

@@ -1,6 +1,8 @@
 """Data pipeline components."""
 import abc
 from string import ascii_uppercase
+from functools import reduce
+from operator import and_
 
 import pandas as pd
 import numpy as np
@@ -11,6 +13,17 @@ CUT_GRADES = 'Poor', 'Fair', 'Good', 'Very Good', 'Premium', 'Ideal'
 COLORS = tuple(reversed(ascii_uppercase[3:]))
 CLARITIES = ('I3', 'I2', 'I1', 'SI2', 'SI1', 'VS2', 'VS1', 'VVS2', 'VVS1',
              'IF', 'FL')
+
+CLEAN_RANGES = {
+    'x': (0.1, np.inf, 'left'),
+    'y': (0.1, np.inf, 'left'),
+    'z': (0.1, np.inf, 'left'),
+    'price': (0., np.inf, 'neither')
+}
+"""Default acceptance ranges for the input data.
+
+To be used with :func:`clean`.
+"""
 
 
 def load_raw(file_or_path) -> pd.DataFrame:
@@ -26,6 +39,30 @@ color_encoder = OrdinalEncoder(categories=[list(COLORS)],
 
 clarity_encoder = OrdinalEncoder(categories=[list(CLARITIES)],
                                  dtype=np.float32)
+
+
+def clean(dataset: pd.DataFrame, ranges_dict=CLEAN_RANGES,
+          **ranges) -> pd.DataFrame:
+    """Clean dataset filtering invalid datapoints, based on ranges.
+
+    ``ranges_dict`` is a dictionary of ranges in the form
+    ``{feature_name: (min, max, inclusive), ...}``, defaulting to
+    :attr:`CLEAN_RANGES`. Replace it with a different dict or fine tune
+    it with keyword arguments. Keyword arguments will be added to the
+    ``ranges_dict``, eventually overwriting its values.
+
+    For the meaning of the ``inclusive`` keyworkd in the range tuple,
+    see pandas ``pandas.Series.between``.
+    """
+    updated_ranges = ranges_dict | ranges
+
+    if not updated_ranges:
+        return dataset
+
+    return dataset[
+        reduce(and_, map(lambda n: dataset[n].between(*updated_ranges[n]),
+                         updated_ranges))
+    ]
 
 
 class _FeatureExtractor(BaseEstimator, TransformerMixin, abc.ABC):
