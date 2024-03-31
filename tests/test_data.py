@@ -10,12 +10,20 @@ import numpy as np
 from context import diamond         # NOQA
 from diamond import data
 
+DATASET_LOCATION = 'datasets/diamonds/diamonds.csv'
+
 
 @pytest.fixture
 def raw_filename() -> str:
     """Pytest fixture: return path to dataset.
     """
-    return 'datasets/diamonds/diamonds.csv'
+    return DATASET_LOCATION
+
+
+@pytest.fixture
+def raw_dataframe(raw_filename) -> pd.DataFrame:
+    """Pytest fixture: load unprocessed dataframe."""
+    return data.load_raw(raw_filename)
 
 
 def test_load_raw(raw_filename):
