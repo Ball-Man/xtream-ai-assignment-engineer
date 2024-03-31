@@ -42,3 +42,10 @@ def test_clarity_encoder():
         np.array(data.CLARITIES).reshape(-1, 1))
 
     assert (color_column[:, 0] == range(11)).all()
+
+
+class TestFeatureExtractor:
+
+    def test_abc(self):
+        with pytest.raises(TypeError):
+            data._FeatureExtractor('...')
