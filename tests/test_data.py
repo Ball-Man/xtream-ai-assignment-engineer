@@ -57,3 +57,23 @@ class TestFeatureExtractor:
     def test_abc(self):
         with pytest.raises(TypeError):
             data._FeatureExtractor('...')
+
+
+class TestVolumeFeatureExtractor:
+
+    @pytest.mark.parametrize('input_name, expected', (('x', 'x'),
+                                                      (None, 'volume')))
+    def test_init(self, input_name, expected):
+        if input_name is None:
+            extractor = data.VolumeFeatureExtractor()
+        else:
+            extractor = data.VolumeFeatureExtractor(expected)
+
+        assert extractor.extracted_feature_name == expected
+
+    def test_extract(self, raw_dataframe):
+        extractor = data.VolumeFeatureExtractor()
+        extracted = extractor.extract(raw_dataframe)
+        assert (extracted >= raw_dataframe.x).all()
+        assert (extracted >= raw_dataframe.y).all()
+        assert (extracted >= raw_dataframe.z).all()

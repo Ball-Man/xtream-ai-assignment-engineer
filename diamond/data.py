@@ -55,3 +55,20 @@ class _FeatureExtractor(BaseEstimator, TransformerMixin, abc.ABC):
         A ``pd.Series`` is the expected output, which will be appended
         to ``X`` by the :meth:`transform` implementation.
         """
+
+
+class VolumeFeatureExtractor(_FeatureExtractor):
+    r"""Transformer, extract volume feature of diamonds.
+
+    ``x``, ``y`` and ``z`` features are required. Formally the feature
+    is defined as:
+
+    :math:`v = x \cdot y \cdot z`.
+    """
+
+    def __init__(self, extracted_feature_name: str = 'volume'):
+        super().__init__(extracted_feature_name)
+
+    def extract(self, X: pd.DataFrame) -> pd.Series:
+        """Extract and return the volume feature."""
+        return X.x * X.y * X.z
