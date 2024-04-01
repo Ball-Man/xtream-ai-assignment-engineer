@@ -127,3 +127,49 @@ class EccentricityFeatureExtractor(_FeatureExtractor):
         """Extract and return the eccentricity feature."""
         return np.sqrt(1. - X[['x', 'y']].min(axis=1)
                        / X[['x', 'y']].max(axis=1))
+
+
+class TableDistanceExtractor(_FeatureExtractor):
+    r"""Transformer, extract relative table distance from mean value.
+
+    ``talbe`` feature is required. Formally the feature is defined
+    as:
+
+    :math:`t' =  |t - \mathbb{E}[t]|`
+    """
+    mean_value = 0.
+
+    def __init__(self, extracted_feature_name: str = 'table_distance'):
+        super().__init__(extracted_feature_name)
+
+    def fit(self, X: pd.DataFrame, y=None):
+        """Fit the extractor."""
+        self.mean_value = X.table.mean()
+        return self
+
+    def extract(self, X: pd.DataFrame) -> pd.Series:
+        """Extract and return the table distance feature."""
+        return (X.table - self.mean_value).abs()
+
+
+class DepthDistanceExtractor(_FeatureExtractor):
+    r"""Transformer, extract relative table distance from mean value.
+
+    ``talbe`` feature is required. Formally the feature is defined
+    as:
+
+    :math:`t' =  |t - \mathbb{E}[t]|`
+    """
+    mean_value = 0.
+
+    def __init__(self, extracted_feature_name: str = 'depth_distance'):
+        super().__init__(extracted_feature_name)
+
+    def fit(self, X: pd.DataFrame, y=None):
+        """Fit the extractor."""
+        self.mean_value = X.depth.mean()
+        return self
+
+    def extract(self, X: pd.DataFrame) -> pd.Series:
+        """Extract and return the depth distance feature."""
+        return (X.depth - self.mean_value).abs()

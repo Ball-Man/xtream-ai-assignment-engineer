@@ -112,3 +112,39 @@ class TestEccentricityFeatureExtractor:
         extracted = extractor.extract(clean_dataframe)
 
         assert extracted.between(0, 1).all()
+
+
+class TestTableDistanceExtractor:
+
+    @pytest.mark.parametrize('input_name, expected',
+                             (('x', 'x'), (None, 'table_distance')))
+    def test_init(self, input_name, expected):
+        if input_name is None:
+            extractor = data.TableDistanceExtractor()
+        else:
+            extractor = data.TableDistanceExtractor(expected)
+
+        assert extractor.extracted_feature_name == expected
+
+    def test_extract(self, clean_dataframe):
+        extractor = data.TableDistanceExtractor()
+        extractor.fit(clean_dataframe)
+        extractor.extract(clean_dataframe)
+
+
+class TestDepthDistanceExtractor:
+
+    @pytest.mark.parametrize('input_name, expected',
+                             (('x', 'x'), (None, 'depth_distance')))
+    def test_init(self, input_name, expected):
+        if input_name is None:
+            extractor = data.DepthDistanceExtractor()
+        else:
+            extractor = data.DepthDistanceExtractor(expected)
+
+        assert extractor.extracted_feature_name == expected
+
+    def test_extract(self, clean_dataframe):
+        extractor = data.DepthDistanceExtractor()
+        extractor.fit(clean_dataframe)
+        extractor.extract(clean_dataframe)
