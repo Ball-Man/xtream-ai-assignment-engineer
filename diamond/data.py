@@ -81,6 +81,12 @@ def split(*datasets: pd.DataFrame, holdout: float = 0.2,
                             random_state=random_state)
 
 
+def get_X_y(dataset: pd.DataFrame,
+            y_column='price') -> tuple[pd.DataFrame, pd.Series]:
+    """Return a dataset split in its features matrix and labels vector."""
+    return dataset.drop(columns=y_column), dataset[y_column]
+
+
 class _FeatureExtractor(BaseEstimator, TransformerMixin, abc.ABC):
     """Base class for a feature extractor transformer.
 
