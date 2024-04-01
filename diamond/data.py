@@ -124,6 +124,6 @@ class EccentricityFeatureExtractor(_FeatureExtractor):
         super().__init__(extracted_feature_name)
 
     def extract(self, X: pd.DataFrame) -> pd.Series:
-        """Extract and return the volume feature."""
+        """Extract and return the eccentricity feature."""
         return np.sqrt(1. - X[['x', 'y']].min(axis=1)
                        / X[['x', 'y']].max(axis=1))
