@@ -8,6 +8,7 @@ import pandas as pd
 import numpy as np
 from sklearn.preprocessing import OrdinalEncoder
 from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.model_selection import train_test_split
 
 CUT_GRADES = 'Poor', 'Fair', 'Good', 'Very Good', 'Premium', 'Ideal'
 COLORS = tuple(reversed(ascii_uppercase[3:]))
@@ -63,6 +64,21 @@ def clean(dataset: pd.DataFrame, ranges_dict=CLEAN_RANGES,
         reduce(and_, map(lambda n: dataset[n].between(*updated_ranges[n]),
                          updated_ranges))
     ]
+
+
+def split(dataset: pd.DataFrame, holdout: float = 0.2,
+          random_state=1245324558) -> list[pd.DataFrame, pd.DataFrame]:
+    """Split dataset.
+
+    ``holdout`` is a float in the range ``(0, 1)`` representing the
+    proportion of the holdout (test set) with respect to the entire
+    dataset. Defaults to 20%.
+
+    In practice, it is just a wrapper function on sklearn's
+    ``train_test_split``, but with defaults tailored for the project.
+    """
+    return train_test_split(dataset, test_size=holdout,
+                            random_state=random_state)
 
 
 class _FeatureExtractor(BaseEstimator, TransformerMixin, abc.ABC):
