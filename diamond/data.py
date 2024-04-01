@@ -7,6 +7,7 @@ from operator import and_
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import OrdinalEncoder
+from sklearn.pipeline import FunctionTransformer
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.model_selection import train_test_split
 
@@ -202,3 +203,7 @@ class DepthDistanceExtractor(_FeatureExtractor):
     def extract(self, X: pd.DataFrame) -> pd.Series:
         """Extract and return the depth distance feature."""
         return (X.depth - self.mean_value).abs()
+
+
+log_transformer = FunctionTransformer(func=np.log1p, inverse_func=np.expm1)
+"""Pipeline transformer, apply an invertible log transformation."""
