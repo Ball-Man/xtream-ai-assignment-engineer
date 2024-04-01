@@ -115,6 +115,13 @@ class _FeatureExtractor(BaseEstimator, TransformerMixin, abc.ABC):
         to ``X`` by the :meth:`transform` implementation.
         """
 
+    def set_output(self, *, transform):
+        """Set output format, in practice only pandas is supported."""
+        if transform != 'pandas':
+            raise ValueError('This feature extractor only supports pandas '
+                             'output format')
+        return self
+
 
 class VolumeFeatureExtractor(_FeatureExtractor):
     r"""Transformer, extract volume feature of diamonds.
