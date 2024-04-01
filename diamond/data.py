@@ -66,8 +66,8 @@ def clean(dataset: pd.DataFrame, ranges_dict=CLEAN_RANGES,
     ]
 
 
-def split(dataset: pd.DataFrame, holdout: float = 0.2,
-          random_state=1245324558) -> list[pd.DataFrame, pd.DataFrame]:
+def split(*datasets: pd.DataFrame, holdout: float = 0.2,
+          random_state=1245324558) -> list[pd.DataFrame]:
     """Split dataset.
 
     ``holdout`` is a float in the range ``(0, 1)`` representing the
@@ -77,7 +77,7 @@ def split(dataset: pd.DataFrame, holdout: float = 0.2,
     In practice, it is just a wrapper function on sklearn's
     ``train_test_split``, but with defaults tailored for the project.
     """
-    return train_test_split(dataset, test_size=holdout,
+    return train_test_split(*datasets, test_size=holdout,
                             random_state=random_state)
 
 
