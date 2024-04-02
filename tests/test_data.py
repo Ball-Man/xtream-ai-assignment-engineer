@@ -6,6 +6,7 @@ they should be semantically very clear.
 import pytest
 import pandas as pd
 import numpy as np
+from sklearn.compose import ColumnTransformer
 
 from context import diamond         # NOQA
 from diamond import data
@@ -148,3 +149,15 @@ class TestDepthDistanceExtractor:
         extractor = data.DepthDistanceExtractor()
         extractor.fit(clean_dataframe)
         extractor.extract(clean_dataframe)
+
+
+@pytest.mark.parametrize('column_names', (
+    (()),
+    (('a', 'b')),
+))
+def test_make_feature_selector(column_names):
+    selector = data.make_feature_selector(*column_names)
+    assert isinstance(selector, ColumnTransformer)
+
+    _, _, actual_names = selector.transformers[0]
+    assert actual_names == column_names

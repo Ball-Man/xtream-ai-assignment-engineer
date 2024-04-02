@@ -8,6 +8,7 @@ import pandas as pd
 import numpy as np
 from sklearn.preprocessing import OrdinalEncoder
 from sklearn.pipeline import FunctionTransformer
+from sklearn.compose import make_column_transformer, ColumnTransformer
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.model_selection import train_test_split
 
@@ -207,3 +208,15 @@ class DepthDistanceExtractor(_FeatureExtractor):
 
 log_transformer = FunctionTransformer(func=np.log, inverse_func=np.exp)
 """Pipeline transformer, apply an invertible log transformation."""
+
+
+def make_feature_selector(*columns: str) -> ColumnTransformer:
+    """Build a feature selector transformer for sklaern pipelines.
+
+    Under the hood, build and return a scikit-learn
+    ``ColumnTransformer`` which selects the desired columns and drops
+    the rest.
+    """
+    return make_column_transformer(('passthrough', columns),
+                                   verbose_feature_names_out=False,
+                                   remainder='drop')
