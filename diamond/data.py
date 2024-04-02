@@ -205,5 +205,5 @@ class DepthDistanceExtractor(_FeatureExtractor):
         return (X.depth - self.mean_value).abs()
 
 
-log_transformer = FunctionTransformer(func=np.log1p, inverse_func=np.expm1)
+log_transformer = FunctionTransformer(func=np.log, inverse_func=np.exp)
 """Pipeline transformer, apply an invertible log transformation."""
