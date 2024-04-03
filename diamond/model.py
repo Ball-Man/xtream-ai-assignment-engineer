@@ -28,7 +28,7 @@ pipeline = Pipeline(
         # Using data.log_transform as transformer here leads the same
         # results, however due to some internal functioning, it triggers
         # a warning. Hence, we prefer the latter form where log and exp
-        # transformations are
+        # transformations are specified manually.
         # ('linear', TransformedTargetRegressor(
         #     LinearRegression(), transformer=data.log_transformer))
         ('linear', TransformedTargetRegressor(
