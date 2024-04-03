@@ -14,6 +14,24 @@ _DictOrListOfDicts = TypeVar('_DictOrListOfDicts',
                              bound=Union[dict[str, Any],
                                          list[dict[str, Any]]])
 
+DEFAULT_USER_PARAMETER_GRID = {
+    'selector': (('carat',), ('volume',), ('carat', 'cut', 'color', 'clarity'),
+                 ('carat', 'cut', 'color', 'clarity', 'eccentricity'),
+                 ('volume', 'cut', 'color', 'clarity'),
+                 ('volume', 'cut', 'color', 'clarity', 'eccentricity'),
+                 ('carat', 'table', 'depth_distance', 'eccentricity',
+                  'color', 'clarity'),
+                 ('volume', 'table', 'depth_distance', 'eccentricity', 'color',
+                  'clarity')),
+    'linear__regressor__positive': (True,)
+}
+"""Default user grid of parameters for grid search.
+
+The grid is not directly applicable to sklearn grid search routines, convert
+it into one using :func:`make_params`. This format is called
+*user parameter grid*, for more info see the function docs.
+"""
+
 
 pipeline = Pipeline(
     steps=[
