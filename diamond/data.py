@@ -220,3 +220,20 @@ def make_feature_selector(*columns: str) -> ColumnTransformer:
     return make_column_transformer(('passthrough', columns),
                                    verbose_feature_names_out=False,
                                    remainder='drop')
+
+
+sequential_encoder = make_column_transformer(
+    (cut_grades_encoder, ['cut']),
+    (color_encoder, ['color']),
+    (clarity_encoder, ['clarity']),
+    remainder='passthrough',
+    verbose_feature_names_out=False
+)
+"""Transformer, encode known columns with proper sequential encoders."""
+
+column_log_transformer = make_column_transformer(
+    (log_transformer, ['x', 'y', 'z', 'volume', 'carat']),
+    remainder='passthrough',
+    verbose_feature_names_out=False
+)
+"""Transformer, apply log transform to proper columns."""
