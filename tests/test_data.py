@@ -33,6 +33,21 @@ def clean_dataframe(raw_filename) -> pd.DataFrame:
     return data.clean(data.load_raw(raw_filename))
 
 
+@pytest.fixture(scope='module', autouse=True)
+def cut_encoder_numpy_output():
+    data.cut_grades_encoder.set_output(transform='default')
+
+
+@pytest.fixture(scope='module', autouse=True)
+def color_encoder_numpy_output():
+    data.color_encoder.set_output(transform='default')
+
+
+@pytest.fixture(scope='module', autouse=True)
+def clarity_encoder_numpy_output():
+    data.clarity_encoder.set_output(transform='default')
+
+
 def test_load_raw(raw_filename):
     df = data.load_raw(raw_filename)
     assert (df.count() > 0).all()
