@@ -4,8 +4,11 @@ import os
 from typing import Optional, Annotated
 import pickle
 import uuid
+from collections.abc import Iterable
 
 import aiocache
+from aiocache.serializers import PickleSerializer
+import numpy as np
 import pandas as pd
 from fastapi import FastAPI, Body, Request
 from fastapi.responses import JSONResponse
@@ -24,7 +27,16 @@ class QueryCache:
     """Cache for unique query IDs."""
 
     def __init__(self):
-        self._cache = aiocache.Cache()
+        self._cache = aiocache.Cache()      # Only used for query IDs
+        # Only used for data batches
+        self._batches_cache = aiocache.Cache(serializer=PickleSerializer())
+
+    async def get_batch_ids(self, id_: str, values=None) -> Iterable[str]:
+        """Retrieve an iterable generating all batch ids for a query."""
+        if values is None:
+            values = await self._cache.get(id_)
+
+        return map(lambda v: f'{id_}/{v}', range(values))
 
     async def exists(self, id_: str) -> bool:
         """Retrieve whether the given id exists."""
@@ -35,8 +47,9 @@ class QueryCache:
         values = await self._cache.get(id_)
 
         # Iteratively delete all cache batches
-        for value in range(values):
-            await self._cache.delete(id_ + f'/{value}')
+        batch_ids = await self.get_batch_ids(id_, values)
+        for batch_id in batch_ids:
+            await self._batches_cache.delete(batch_id)
 
         # Finally delete master id
         await self._cache.delete(id_)
@@ -57,8 +70,27 @@ class QueryCache:
         await self._cache.set(new_id, 0)
         return new_id
 
-    async def add_batch(self, id_: str, batch):
-        """TODO"""
+    async def add_batch(self, id_: str, batch: np.ndarray):
+        """Add a new batch to the cache.
+
+        This creates a new key in the cache in the form:
+        ``id_/x`` where ``x`` is ``cache[id_]``. Moreover, the internal
+        counter ``cache[id_]`` is increased by one.
+        """
+        # Retrieve current count and increase it
+        current_index = await self._cache.get(id_)
+        await self._cache.increase(id_)
+
+        await self._batches_cache.set(f'{id_}/{current_index}', batch)
+
+    async def get_whole_batch(self, id_: str) -> np.ndarray:
+        """Retrieve and concatenate all cached batches.
+
+        Batches are not deleted from cache.
+        """
+        batch_ids = await self.get_batch_ids(id_)
+        batches = self._batches_cache.multi_get(list(batch_ids))
+        return np.concatenate(batches)
 
 
 query_cache = QueryCache()
