@@ -62,8 +62,8 @@ async def root():
 
 
 @app.put("/models/{model_id}")
-async def models(model_id: str, dataset_id: Annotated[str, Body()],
-                 hyperparams: Optional[Hyperparams] = None):
+async def model_train(model_id: str, dataset_id: Annotated[str, Body()],
+                      hyperparams: Optional[Hyperparams] = None):
     """Train a model using the given hyperparameters and dataset."""
     X_train, X_test, y_train, y_test = get_dataset(dataset_id)
 
