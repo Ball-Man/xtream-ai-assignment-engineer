@@ -83,7 +83,7 @@ class QueryCache:
         """
         # Retrieve current count and increase it
         current_index = await self._cache.get(id_)
-        await self._cache.increase(id_)
+        await self._cache.increment(id_)
 
         await self._batches_cache.set(f'{id_}/{current_index}', batch)
 
