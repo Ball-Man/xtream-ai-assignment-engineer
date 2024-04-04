@@ -3,7 +3,9 @@ import os.path
 import os
 from typing import Optional, Annotated
 import pickle
+import uuid
 
+import aiocache
 import pandas as pd
 from fastapi import FastAPI, Body
 from pydantic import BaseModel
@@ -15,6 +17,50 @@ app = FastAPI()
 
 DATASETS_ROOT_LOCATION = os.path.join('datasets', 'diamonds')
 MODELS_ROOT_LOCATION = 'models'
+
+
+class QueryCache:
+    """Cache for unique query IDs."""
+
+    def __init__(self):
+        self._cache = aiocache.Cache()
+
+    async def exists(self, id_: str) -> bool:
+        """Retrieve whether the given id exists."""
+        return await self._cache.exists(id_)
+
+    async def delete(self, id_: str):
+        """Delete the given query from cache, if it exists."""
+        values = await self._cache.get(id_)
+
+        # Iteratively delete all cache batches
+        for value in range(values):
+            await self._cache.delete(id_ + f'/{value}')
+
+        # Finally delete master id
+        await self._cache.delete(id_)
+
+    async def generate(self) -> str:
+        """Generate a unique id and cache it.
+
+        The generated id serves as a "master" location for the query.
+        Multiple batches can be appended to the query, through
+        :func:`add_batch`. See the function's docs for more info.
+        """
+        new_id = str(uuid.uuid4())
+        exists = await self.exists(new_id)
+        while exists:       # Conflicts are rare, keep trying
+            new_id = str(uuid.uuid4())
+            exists = await self.exists(new_id)
+
+        await self._cache.set(new_id, 0)
+        return new_id
+
+    async def add_batch(self, id_: str, batch):
+        """TODO"""
+
+
+query_cache = QueryCache()
 
 
 def get_model_location(id_, format_='pkl',
