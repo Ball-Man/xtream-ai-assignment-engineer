@@ -128,6 +128,11 @@ class Hyperparams(BaseModel):
     linear__regressor__positive: bool
 
 
+class QueryLocation(BaseModel):
+    """Prediction query descriptor."""
+    location: str
+
+
 @app.exception_handler(Exception)
 async def unicorn_exception_handler(request: Request, exc: Exception):
     """Catch all exceptions and create a response with its message.
@@ -172,3 +177,27 @@ async def model_delete(model_id: str):
     model_location = get_model_location(model_id)
 
     os.remove(model_location)
+
+
+@app.post("/models/{model_id}/prices")
+async def model_create_query(model_id: str) -> QueryLocation:
+    """Create a prediction query for the model.
+
+    The response contains an endpoint which can be used to populate
+    the query. See the documentation of
+    ``POST /models/{model_id}/prices/{query_id}``.
+    """
+    query_id = await query_cache.generate()
+
+    return QueryLocation(location=f'models/{model_id}/prices/{query_id}')
+
+
+@app.delete("/models/{model_id}/prices/{query_id}")
+async def model_delete_query(model_id: str, query_id: str):
+    """Create a prediction query for the model.
+
+    The response contains an endpoint which can be used to populate
+    the query. See the documentation of
+    ``POST /models/{model_id}/prices/{query_id}``.
+    """
+    await query_cache.delete(query_id)
