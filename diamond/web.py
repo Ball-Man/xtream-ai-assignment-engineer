@@ -137,6 +137,29 @@ class QueryLocation(BaseModel):
     location: str
 
 
+class QuerySize(BaseModel):
+    """Number of batches appended to the query so far."""
+    batch_number: int
+
+
+class DataSample(BaseModel):
+    """A sample representing the properties of a single diamond."""
+    carat: float
+    cut: str
+    color: str
+    clarity: str
+    depth: float
+    table: float
+    x: float
+    y: float
+    z: float
+
+    def numpy(self) -> np.ndarray:
+        """Return data in a numpy array suitable for caching."""
+        return np.array([self.carat, self.cut, self.color, self.clarity,
+                         self.depth, self.table, self.x, self.y, self.z])
+
+
 @app.exception_handler(Exception)
 async def unicorn_exception_handler(request: Request, exc: Exception):
     """Catch all exceptions and create a response with its message.
@@ -205,3 +228,24 @@ async def model_delete_query(model_id: str, query_id: str):
     ``POST /models/{model_id}/prices/{query_id}``.
     """
     await query_cache.delete(query_id)
+
+
+@app.post("/models/{model_id}/prices/{query_id}")
+async def model_update_query(model_id: str, query_id: str,
+                             batch: list[DataSample]) -> QuerySize:
+    """Populate query for the model.
+
+    Every request to this endpoint results in a new batch of data being
+    appended to the specified query. Each batch is a list of samples,
+    that is, a list of individual diamonds. When all the data has been
+    appended, use ``GET /models{model_id}/prices/{query_id}`` to
+    retrieve results.
+
+    The response contains the total number of batches so far in the
+    query.
+    """
+    numpy_batch = np.vstack([sample.numpy() for sample in batch])
+    await query_cache.add_batch(query_id, numpy_batch)
+
+    batch_number = await query_cache.batches(query_id)
+    return {'batch_number': batch_number}
