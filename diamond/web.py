@@ -67,6 +67,8 @@ async def models(model_id: str, dataset_id: Annotated[str, Body()],
     """Train a model using the given hyperparameters and dataset."""
     X_train, X_test, y_train, y_test = get_dataset(dataset_id)
 
+    model.pipeline.set_params(
+        **model.make_params(hyperparams.dict(), grid=False))
     model.pipeline.fit(X_train, y_train)
 
     with open(get_model_location(model_id), 'wb') as fout:
