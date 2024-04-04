@@ -7,7 +7,8 @@ import uuid
 
 import aiocache
 import pandas as pd
-from fastapi import FastAPI, Body
+from fastapi import FastAPI, Body, Request
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
 from diamond import data
@@ -93,6 +94,18 @@ class Hyperparams(BaseModel):
     """
     selector: list[str]
     linear__regressor__positive: bool
+
+
+@app.exception_handler(Exception)
+async def unicorn_exception_handler(request: Request, exc: Exception):
+    """Catch all exceptions and create a response with its message.
+
+    A simple solution, mostly for debug purposes.
+    """
+    return JSONResponse(
+        status_code=500,
+        content={'message': str(exc)},
+    )
 
 
 @app.on_event("startup")
