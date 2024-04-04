@@ -42,6 +42,10 @@ class QueryCache:
         """Retrieve whether the given id exists."""
         return await self._cache.exists(id_)
 
+    async def batches(self, id_: str) -> int:
+        """Retrieve number of batches in the query."""
+        return await self._cache.get(id_)
+
     async def delete(self, id_: str):
         """Delete the given query from cache, if it exists."""
         values = await self._cache.get(id_)
