@@ -73,3 +73,11 @@ async def model_train(model_id: str, dataset_id: Annotated[str, Body()],
 
     with open(get_model_location(model_id), 'wb') as fout:
         pickle.dump(model.pipeline, fout)
+
+
+@app.delete("/models/{model_id}")
+async def model_delete(model_id: str):
+    """Delete an existing model."""
+    model_location = get_model_location(model_id)
+
+    os.remove(model_location)
