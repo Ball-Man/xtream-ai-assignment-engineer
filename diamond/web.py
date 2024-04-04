@@ -1,11 +1,15 @@
 """REST API web server controller."""
 import os.path
 import os
+from typing import Optional, Annotated
+import pickle
 
 import pandas as pd
-from fastapi import FastAPI
+from fastapi import FastAPI, Body
+from pydantic import BaseModel
 
 from diamond import data
+from diamond import model
 
 app = FastAPI()
 
@@ -36,6 +40,15 @@ def get_dataset(id_, format_='csv',
                       **split_args)
 
 
+class Hyperparams(BaseModel):
+    """ML model hyperparameters.
+
+    Attribute names are designed to be sklearn-ready.
+    """
+    selector: list[str]
+    linear__regressor__positive: bool
+
+
 @app.on_event("startup")
 async def setup_directories():
     """Create resource directories for models and datasets, if needed."""
@@ -46,3 +59,15 @@ async def setup_directories():
 @app.get("/")
 async def root():
     return {"message": "Diamond model API"}
+
+
+@app.put("/models/{model_id}")
+async def models(model_id: str, dataset_id: Annotated[str, Body()],
+                 hyperparams: Optional[Hyperparams] = None):
+    """Train a model using the given hyperparameters and dataset."""
+    X_train, X_test, y_train, y_test = get_dataset(dataset_id)
+
+    model.pipeline.fit(X_train, y_train)
+
+    with open(get_model_location(model_id), 'wb') as fout:
+        pickle.dump(model.pipeline, fout)
