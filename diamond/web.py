@@ -188,6 +188,18 @@ class DataSample(BaseModel):
                          self.depth, self.table, self.x, self.y, self.z])
 
 
+class Prediction(BaseModel):
+    """Diamond price prediction."""
+    price: float
+
+
+class PredictionPage(BaseModel):
+    """A page of predictions from the model."""
+    predictions: list[Prediction]
+    next_page_location: Optional[str]
+    total_pages: int
+
+
 @app.exception_handler(Exception)
 async def unicorn_exception_handler(request: Request, exc: Exception):
     """Catch all exceptions and create a response with its message.
@@ -277,3 +289,56 @@ async def model_update_query(model_id: str, query_id: str,
 
     batch_number = await query_cache.batches(query_id)
     return {'batch_number': batch_number}
+
+
+@app.get("/models/{model_id}/prices/{query_id}")
+async def model_get_results(model_id: str, query_id: str,
+                            page: int, page_size: int) -> PredictionPage:
+    """Get query results.
+
+    Requesting this resource causes the model to predict the entirety
+    of the query. The query must be first created through
+    ``POST /models/{model_id}/prices`` and populated through
+    ``POST /models/{model_id}/prices/{query_id}``. Query results are
+    cached and can must accessed through pagination. After the result
+    is computed, it is not possible to populate the query any further.
+
+    Queries must be manually disposed via
+    ``DELETE /models/{model_id}/prices/{query_id}``.
+    """
+    is_results = await results_cache.exists(query_id)
+
+    # If not present, compute results and cache them
+    if not is_results:
+        with open(get_model_location(model_id), 'rb') as fin:
+            loaded_model = pickle.load(fin)
+
+        query_data = await query_cache.get_whole_batch(query_id)
+
+        # TODO: this datatype conversions should happen directly in
+        # the model pipeline.
+        query_df = pd.DataFrame(query_data,
+                                columns=loaded_model.feature_names_in_)
+        query_df = query_df.astype({
+            'carat': np.float32,
+            'depth': np.float32,
+            'table': np.float32,
+            'x': np.float32,
+            'y': np.float32,
+            'z': np.float32,
+        })
+        results = loaded_model.predict(query_df)
+
+        await results_cache.set(query_id, results)
+
+    # There are a couple of extra cache reads here and there
+    total_pages, paginated_results = await get_cache_paginated(
+        results_cache, query_id, page, page_size)
+
+    next_ = None            # If this is the last page, return null value
+    if page + 1 < total_pages:
+        next_ = (f'/models/{model_id}/prices/{query_id}'
+                 f'?page={page + 1}&page_size={page_size}')
+    return {'predictions': [{'price': price} for price in paginated_results],
+            'next_page_location': next_,
+            'total_pages': total_pages}
