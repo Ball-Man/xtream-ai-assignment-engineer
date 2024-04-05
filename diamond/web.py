@@ -25,6 +25,8 @@ app = FastAPI()
 DATASETS_ROOT_LOCATION = os.path.join('datasets', 'diamonds')
 MODELS_ROOT_LOCATION = 'models'
 
+DATASET_CSV_HEADER = 'carat,cut,color,clarity,depth,table,price,x,y,z\n'
+
 results_cache: aiocache.BaseCache = aiocache.Cache(
     serializer=PickleSerializer())
 
@@ -275,6 +277,20 @@ async def datasets_get(page: int, page_size: int) -> ResponsePage[Dataset]:
     return {'results': [{'id_': price} for price in paginated_results],
             'next_page_location': next_,
             'total_pages': total_pages}
+
+
+@app.put("/datasets/{dataset_id}")
+async def dataset_create(dataset_id: str):
+    """Create or replace an existing dataset.
+
+    The request will always create an empty dataset. Use
+    ``POST /datasets/{dataset_id}`` to populate it, after being created.
+    """
+    await results_cache.delete('datasets')
+
+    # Out of simplicity, use a preconfigured header for the csv
+    with open(get_dataset_location(dataset_id), 'w') as fout:
+        fout.write(DATASET_CSV_HEADER)
 
 
 @app.get("/models")
