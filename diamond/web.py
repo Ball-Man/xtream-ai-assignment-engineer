@@ -1,7 +1,7 @@
 """REST API web server controller."""
 import os.path
 import os
-from typing import Optional, Annotated
+from typing import Optional, Annotated, Generic, TypeVar
 import pickle
 import uuid
 from collections.abc import Iterable, Sequence
@@ -16,6 +16,8 @@ from pydantic import BaseModel
 
 from diamond import data
 from diamond import model
+
+_T = TypeVar('_T')
 
 app = FastAPI()
 
@@ -193,9 +195,9 @@ class Prediction(BaseModel):
     price: float
 
 
-class PredictionPage(BaseModel):
-    """A page of predictions from the model."""
-    predictions: list[Prediction]
+class ResponsePage(BaseModel, Generic[_T]):
+    """Paginated responses."""
+    results: list[_T]
     next_page_location: Optional[str]
     total_pages: int
 
@@ -293,7 +295,8 @@ async def model_update_query(model_id: str, query_id: str,
 
 @app.get("/models/{model_id}/prices/{query_id}")
 async def model_get_results(model_id: str, query_id: str,
-                            page: int, page_size: int) -> PredictionPage:
+                            page: int,
+                            page_size: int) -> ResponsePage[Prediction]:
     """Get query results.
 
     Requesting this resource causes the model to predict the entirety
@@ -339,6 +342,6 @@ async def model_get_results(model_id: str, query_id: str,
     if page + 1 < total_pages:
         next_ = (f'/models/{model_id}/prices/{query_id}'
                  f'?page={page + 1}&page_size={page_size}')
-    return {'predictions': [{'price': price} for price in paginated_results],
+    return {'results': [{'price': price} for price in paginated_results],
             'next_page_location': next_,
             'total_pages': total_pages}
