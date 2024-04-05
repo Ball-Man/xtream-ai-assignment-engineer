@@ -312,6 +312,30 @@ async def dataset_create(dataset_id: str):
         fout.write(','.join(DATASET_CSV_HEADER) + '\n')
 
 
+@app.post("/datasets/{dataset_id}")
+async def dataset_update(dataset_id: str, batch: list[DataSample]):
+    """Append a batch of data to a given dataset.
+
+    The dataset must exist: create an empty one with
+    ``PUT /datasets/{dataset_id}`` or retrieve an existing one with
+    ``GET /datasets``. A batch of data is a list of samples, that is,
+    of individual diamonds.
+    """
+    np_batch = np.vstack([sample.numpy() for sample in batch])
+
+    df = (pd.DataFrame(np_batch,
+                       columns=DATASET_CSV_HEADER)
+          .astype(DATASET_DTYPES)
+          .astype(DATASET_TARGET_DTYPE))
+
+    # Datasets are csv, open in append mode and append without loading
+    # it entirely.
+    df.to_csv(get_dataset_location(dataset_id), mode='a', header=False,
+              index=False)
+    # with open(get_dataset_location(dataset_id), 'ab') as fout:
+    #     np.savetxt(fout, np_batch)
+
+
 @app.get("/models")
 async def models_get(page: int, page_size: int) -> ResponsePage[MLModel]:
     """Get available model ids, paginated."""
