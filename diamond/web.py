@@ -121,7 +121,7 @@ class QueryCache:
         Batches are not deleted from cache.
         """
         batch_ids = await self.get_batch_ids(id_)
-        batches = self._batches_cache.multi_get(list(batch_ids))
+        batches = await self._batches_cache.multi_get(list(batch_ids))
         return np.concatenate(batches)
 
 
