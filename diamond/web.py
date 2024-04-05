@@ -223,6 +223,11 @@ class MLModel(BaseModel):
     id_: str
 
 
+class Dataset(BaseModel):
+    """Dataset metadata."""
+    id_: str
+
+
 @app.exception_handler(Exception)
 async def unicorn_exception_handler(request: Request, exc: Exception):
     """Catch all exceptions and create a response with its message.
@@ -243,11 +248,33 @@ async def setup_directories():
 
     await cache_filesystem(results_cache, 'models', MODELS_ROOT_LOCATION,
                            'pkl')
+    await cache_filesystem(results_cache, 'datasets', DATASETS_ROOT_LOCATION,
+                           'csv')
 
 
 @app.get("/")
 async def root():
     return {"message": "Diamond model API"}
+
+
+@app.get("/datasets")
+async def datasets_get(page: int, page_size: int) -> ResponsePage[Dataset]:
+    """Get available dataset ids, paginated."""
+    # TODO: this has replication with the models part, merge them
+    is_results = await results_cache.exists('datasets')
+    if not is_results:
+        await cache_filesystem(results_cache, 'datasets',
+                               DATASETS_ROOT_LOCATION, 'csv')
+
+    total_pages, paginated_results = await get_cache_paginated(
+        results_cache, 'datasets', page, page_size)
+
+    next_ = None            # If this is the last page, return null value
+    if page + 1 < total_pages:
+        next_ = (f'/datasets?page={page + 1}&page_size={page_size}')
+    return {'results': [{'id_': price} for price in paginated_results],
+            'next_page_location': next_,
+            'total_pages': total_pages}
 
 
 @app.get("/models")
