@@ -241,6 +241,9 @@ async def setup_directories():
     os.makedirs(DATASETS_ROOT_LOCATION, exist_ok=True)
     os.makedirs(MODELS_ROOT_LOCATION, exist_ok=True)
 
+    await cache_filesystem(results_cache, 'models', MODELS_ROOT_LOCATION,
+                           'pkl')
+
 
 @app.get("/")
 async def root():
