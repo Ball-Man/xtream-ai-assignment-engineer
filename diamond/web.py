@@ -13,7 +13,7 @@ import numpy as np
 import pandas as pd
 from fastapi import FastAPI, Body, Request
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from diamond import data
 from diamond import model
@@ -192,15 +192,46 @@ class Hyperparams(BaseModel):
     selector: list[str]
     linear__regressor__positive: bool
 
+    model_config = {
+        'json_schema_extra': {
+            'examples': [
+                {
+                    'selector': ['carat', 'cut', 'color', 'clarity'],
+                    'linear__regressor__positive': True
+                }
+            ]
+        }
+    }
+
 
 class QueryLocation(BaseModel):
     """Prediction query descriptor."""
     location: str
 
+    model_config = {
+        'json_schema_extra': {
+            'examples': [
+                {
+                    'location': '/models/example-model/example-query'
+                }
+            ]
+        }
+    }
+
 
 class QuerySize(BaseModel):
     """Number of batches appended to the query so far."""
     batch_number: int
+
+    model_config = {
+        'json_schema_extra': {
+            'examples': [
+                {
+                    'batch_numer': 3
+                }
+            ]
+        }
+    }
 
 
 class DataSample(BaseModel):
@@ -231,22 +262,53 @@ class Prediction(BaseModel):
     """Diamond price prediction."""
     price: float
 
+    model_config = {
+        'json_schema_extra': {
+            'examples': [
+                {
+                    'price': 2823
+                }
+            ]
+        }
+    }
+
 
 class ResponsePage(BaseModel, Generic[_T]):
     """Paginated responses."""
     results: list[_T]
-    next_page_location: Optional[str]
-    total_pages: int
+    next_page_location: Optional[str] = Field(
+        examples=['/example_endpoint?page=2&page_size=1', None])
+    total_pages: int = Field(examples=[10])
 
 
 class MLModel(BaseModel):
     """Model metadata."""
     id_: str
 
+    model_config = {
+        'json_schema_extra': {
+            'examples': [
+                {
+                    'id_': 'example_model'
+                }
+            ]
+        }
+    }
+
 
 class Dataset(BaseModel):
     """Dataset metadata."""
     id_: str
+
+    model_config = {
+        'json_schema_extra': {
+            'examples': [
+                {
+                    'id_': 'example_dataset'
+                }
+            ]
+        }
+    }
 
 
 @app.exception_handler(Exception)
@@ -313,7 +375,35 @@ async def dataset_create(dataset_id: str):
 
 
 @app.post("/datasets/{dataset_id}")
-async def dataset_update(dataset_id: str, batch: list[DataSample]):
+async def dataset_update(
+    dataset_id: str,
+    batch: Annotated[
+        list[DataSample],
+        Body(examples=[[{
+                'carat': 1.1,
+                'cut': 'Ideal',
+                'color': 'H',
+                'clarity': 'SI2',
+                'depth': 62.0,
+                'table': 55.0,
+                'price': 4733.0,
+                'x': 6.61,
+                'y': 6.65,
+                'z': 4.11
+            },
+            {
+                'carat': 1.29,
+                'cut': 'Ideal',
+                'color': 'H',
+                'clarity': 'SI1',
+                'depth': 62.6,
+                'table': 56.0,
+                'price': 6424.0,
+                'x': 6.96,
+                'y': 6.93,
+                'z': 4.35
+            }
+        ]])]):
     """Append a batch of data to a given dataset.
 
     The dataset must exist: create an empty one with
@@ -414,8 +504,34 @@ async def model_delete_query(model_id: str, query_id: str):
 
 
 @app.post("/models/{model_id}/prices/{query_id}")
-async def model_update_query(model_id: str, query_id: str,
-                             batch: list[DataSample]) -> QuerySize:
+async def model_update_query(
+    model_id: str,
+    query_id: str,
+    batch: Annotated[
+        list[DataSample],
+        Body(examples=[[{
+                'carat': 1.1,
+                'cut': 'Ideal',
+                'color': 'H',
+                'clarity': 'SI2',
+                'depth': 62.0,
+                'table': 55.0,
+                'x': 6.61,
+                'y': 6.65,
+                'z': 4.11
+            },
+            {
+                'carat': 1.29,
+                'cut': 'Ideal',
+                'color': 'H',
+                'clarity': 'SI1',
+                'depth': 62.6,
+                'table': 56.0,
+                'x': 6.96,
+                'y': 6.93,
+                'z': 4.35
+            }
+        ]])]) -> QuerySize:
     """Populate query for the model.
 
     Every request to this endpoint results in a new batch of data being
