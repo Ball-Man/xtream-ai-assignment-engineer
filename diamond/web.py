@@ -4,7 +4,7 @@ import os
 from typing import Optional, Annotated
 import pickle
 import uuid
-from collections.abc import Iterable
+from collections.abc import Iterable, Sequence
 
 import aiocache
 from aiocache.serializers import PickleSerializer
@@ -21,6 +21,26 @@ app = FastAPI()
 
 DATASETS_ROOT_LOCATION = os.path.join('datasets', 'diamonds')
 MODELS_ROOT_LOCATION = 'models'
+
+results_cache: aiocache.BaseCache = aiocache.Cache(
+    serializer=PickleSerializer())
+
+
+async def get_cache_paginated(cache: aiocache.BaseCache, key: str, page: int,
+                              page_size: int) -> tuple[int, Sequence]:
+    """Extract a value from cache and return it paginated.
+
+    This approach always deserializes the entire cached value, which may
+    not be ideal for scalability. Yet, it scales better than replicating
+    IO operations or model predictions at each query.
+    """
+    cached_values = await cache.get(key)
+
+    total_pages, remainder = divmod(len(cached_values), page_size)
+
+    start_offset = page * page_size
+    return (total_pages + (remainder != 0),
+            cached_values[start_offset : start_offset + page_size])     # NOQA
 
 
 class QueryCache:
