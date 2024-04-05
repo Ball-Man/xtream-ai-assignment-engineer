@@ -336,6 +336,16 @@ async def dataset_update(dataset_id: str, batch: list[DataSample]):
     #     np.savetxt(fout, np_batch)
 
 
+@app.delete("/dataset/{dataset_id}")
+async def dataset_delete(dataset_id: str):
+    """Delete an existing dataset."""
+    await results_cache.delete('datasets')
+
+    dataset_location = get_dataset_location(dataset_id)
+
+    os.remove(dataset_location)
+
+
 @app.get("/models")
 async def models_get(page: int, page_size: int) -> ResponsePage[MLModel]:
     """Get available model ids, paginated."""
