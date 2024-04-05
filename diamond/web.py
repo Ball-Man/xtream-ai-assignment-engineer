@@ -44,7 +44,7 @@ async def get_cache_paginated(cache: aiocache.BaseCache, key: str, page: int,
 
 
 class QueryCache:
-    """Cache for unique query IDs."""
+    """Cache for model queries."""
 
     def __init__(self):
         self._cache = aiocache.Cache()      # Only used for query IDs
