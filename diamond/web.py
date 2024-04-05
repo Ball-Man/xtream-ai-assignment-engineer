@@ -25,7 +25,20 @@ app = FastAPI()
 DATASETS_ROOT_LOCATION = os.path.join('datasets', 'diamonds')
 MODELS_ROOT_LOCATION = 'models'
 
-DATASET_CSV_HEADER = 'carat,cut,color,clarity,depth,table,price,x,y,z\n'
+DATASET_CSV_HEADER = ('carat', 'cut', 'color', 'clarity', 'depth', 'table',
+                      'price', 'x', 'y', 'z')
+DATASET_DTYPES = {
+    'carat': np.float32,
+    'depth': np.float32,
+    'table': np.float32,
+    'x': np.float32,
+    'y': np.float32,
+    'z': np.float32,
+}
+DATASET_TARGET_DTYPE = {
+    'price': np.float32
+}
+
 
 results_cache: aiocache.BaseCache = aiocache.Cache(
     serializer=PickleSerializer())
@@ -201,11 +214,17 @@ class DataSample(BaseModel):
     x: float
     y: float
     z: float
+    price: Optional[float] = None
 
     def numpy(self) -> np.ndarray:
         """Return data in a numpy array suitable for caching."""
+        if self.price is None:
+            return np.array([self.carat, self.cut, self.color, self.clarity,
+                             self.depth, self.table, self.x, self.y, self.z])
+
         return np.array([self.carat, self.cut, self.color, self.clarity,
-                         self.depth, self.table, self.x, self.y, self.z])
+                         self.depth, self.table, self.price, self.x, self.y,
+                         self.z])
 
 
 class Prediction(BaseModel):
@@ -290,7 +309,7 @@ async def dataset_create(dataset_id: str):
 
     # Out of simplicity, use a preconfigured header for the csv
     with open(get_dataset_location(dataset_id), 'w') as fout:
-        fout.write(DATASET_CSV_HEADER)
+        fout.write(','.join(DATASET_CSV_HEADER) + '\n')
 
 
 @app.get("/models")
@@ -412,14 +431,7 @@ async def model_get_results(model_id: str, query_id: str,
         # the model pipeline.
         query_df = pd.DataFrame(query_data,
                                 columns=loaded_model.feature_names_in_)
-        query_df = query_df.astype({
-            'carat': np.float32,
-            'depth': np.float32,
-            'table': np.float32,
-            'x': np.float32,
-            'y': np.float32,
-            'z': np.float32,
-        })
+        query_df = query_df.astype(DATASET_DTYPES)
         results = loaded_model.predict(query_df)
 
         await results_cache.set(query_id, results)
