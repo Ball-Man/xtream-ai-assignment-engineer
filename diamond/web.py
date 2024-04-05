@@ -46,10 +46,13 @@ async def get_cache_paginated(cache: aiocache.BaseCache, key: str, page: int,
 class QueryCache:
     """Cache for model queries."""
 
-    def __init__(self):
+    def __init__(self, results_cache: aiocache.BaseCache):
         self._cache = aiocache.Cache()      # Only used for query IDs
         # Only used for data batches
         self._batches_cache = aiocache.Cache(serializer=PickleSerializer())
+        # Must have a reference to the results cache in order to clean
+        # up on delete.
+        self._results_cache = results_cache
 
     async def get_batch_ids(self, id_: str, values=None) -> Iterable[str]:
         """Retrieve an iterable generating all batch ids for a query."""
@@ -77,6 +80,11 @@ class QueryCache:
 
         # Finally delete master id
         await self._cache.delete(id_)
+
+        # If results were computed, clean them as well
+        is_results = await self._results_cache.exists(id_)
+        if is_results:
+            await self._results_cache.delete(id_)
 
     async def generate(self) -> str:
         """Generate a unique id and cache it.
@@ -117,7 +125,7 @@ class QueryCache:
         return np.concatenate(batches)
 
 
-query_cache = QueryCache()
+query_cache = QueryCache(results_cache)
 
 
 def get_model_location(id_, format_='pkl',
