@@ -332,8 +332,6 @@ async def dataset_update(dataset_id: str, batch: list[DataSample]):
     # it entirely.
     df.to_csv(get_dataset_location(dataset_id), mode='a', header=False,
               index=False)
-    # with open(get_dataset_location(dataset_id), 'ab') as fout:
-    #     np.savetxt(fout, np_batch)
 
 
 @app.delete("/dataset/{dataset_id}")
