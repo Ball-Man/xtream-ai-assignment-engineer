@@ -1,6 +1,7 @@
 """REST API web server controller."""
 import os.path
 import os
+from glob import iglob
 from typing import Optional, Annotated, Generic, TypeVar
 import pickle
 import uuid
@@ -43,6 +44,21 @@ async def get_cache_paginated(cache: aiocache.BaseCache, key: str, page: int,
     start_offset = page * page_size
     return (total_pages + (remainder != 0),
             cached_values[start_offset : start_offset + page_size])     # NOQA
+
+
+async def cache_filesystem(cache: aiocache.BaseCache, key: str, directory: str,
+                           format_: str):
+    """Filter the given directory and cache results (not recursive).
+
+    This completely replaces any previously cached values on the same
+    key. A list of file basenames (without extension) is cached.
+    """
+    # Do this with a complex one liner if you seek performance
+    resources = []
+    for full_path in iglob(os.path.join(directory, f'*.{format_}')):
+        resources.append(os.path.splitext(os.path.basename(full_path))[0])
+
+    await cache.set(key, resources)
 
 
 class QueryCache:
