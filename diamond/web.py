@@ -20,7 +20,21 @@ from diamond import model
 
 _T = TypeVar('_T')
 
-app = FastAPI()
+API_DESCRIPTION = '''\
+This is a REST API to manage and serve diamond price prediction models.
+
+Resources are structured in two main hierarchies: models and datasets.
+Users can create and update datasets using the `/datasets/...` endpoints.
+Similarly, new models can be trained and queried using the `/models/...`
+endpoints.
+
+To get started, get the available datasets with `GET /datasets` and
+available models with `GET /models`. All GETs return paginated results.
+
+> WARNING: these endpoints are a proof of concept and do not provide
+extensive validation of the parameters, mostly due to time constraints.
+'''
+app = FastAPI(title='Diamond API', description=API_DESCRIPTION)
 
 DATASETS_ROOT_LOCATION = os.path.join('datasets', 'diamonds')
 MODELS_ROOT_LOCATION = 'models'
