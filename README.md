@@ -96,6 +96,8 @@ Notebooks cover **challenges 1 and 2**:
 * [data_exploration.ipynb](data_exploration.ipynb): this is not directly part of a challenge, but it comprises the necessary data exploration which leads to the model and pipeline design.
 * [model.ipynb](model.ipynb): comprises challenge 1 and 2. A model is built based on domain knowledge and information extracted during the data exploration phase. `scikit-learn` is used to design and develop a full pipeline which serves data to the model.
 
+Notebooks in this repository **are not rendered**, meaning that they have to be downloaded and executed to observe the results. They are committed unrendered due to the relatively high storage cost of figures. Take a look at the [prerendered branch](https://github.com/Ball-Man/xtream-ai-assignment-engineer/tree/prerendered), where the rendered versions of the notebook were commited and can be observed directly from GitHub. This approach is more sustainable since these branches can be eventually deleted and the main branch remains lightweight.
+
 Finally, [system_design.md](system_design.md) details the design of an AWS serverless system to serve the model to the public at scale (**challenge 4**).
 
 ### Package Installation
