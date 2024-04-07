@@ -84,4 +84,68 @@ So, ready to add some sparkle to this challenge? Let's make these diamonds shine
 ## How to run
 ![Iguana](assets/iguana-1489682573Qj6-rescaled.jpg)
 
-Please fill this section as part of the assignment.
+The repository is structured as a collection of documents (jupyter notebooks and markdown) which are human consultable and provide a clear explanation and visualization of the work. All the notebooks make use of a centralized codebase, which is a proper python package named `diamond`. The package lives on its own, and can be downloaded and installed independently from the notebooks to design custom implementations.
+
+In practice, an OLS linear regressor is the heart of the final model. The model is constrained to have positive coefficients for extra interpretability, and uses the most commonly used features in the world of diamond certification.
+
+### Documents
+A preliminary manifest markdown document describes the overall ideas and initial motivations of the project: [manifest.md](manifest.md). The project originated from this very document, some details may have changed during development. Consult it mostly for archival reasons.
+
+Notebooks cover **challenges 1 and 2**:
+
+* [data_exploration.ipynb](data_exploration.ipynb): this is not directly part of a challenge, but it comprises the necessary data exploration which leads to the model and pipeline design.
+* [model.ipynb](model.ipynb): comprises challenge 1 and 2. A model is built based on domain knowledge and information extracted during the data exploration phase. `scikit-learn` is used to design and develop a full pipeline which serves data to the model.
+
+Finally, [system_design.md](system_design.md) details the design of an AWS serverless system to serve the model to the public at scale (**challenge 4**).
+
+### Package Installation
+Python >= 3.9 is required.
+
+Automatic installation can be carried out as usual with pip:
+```bash
+pip install "diamond[all] @ git+https://github.com/Ball-Man/xtream-ai-assignment-engineer"
+```
+or by cloning the repository locally first (useful e.g. for editable/dev installations):
+```bash
+git clone https://github.com/Ball-Man/xtream-ai-assignment-engineer
+cd xtream-ai-assignment-engineer
+pip install ".[all]"
+```
+This will install all the dependencies, including notebook visualization and web API requirements. Notebooks themselves will not be downloaded by pip, please consult them directly from GitHub or consider cloning the repository if you are interested in those.
+
+A **minimal installation**, capable of running the model pipeline only, is obtained with via:
+```
+pip install "git+https://github.com/Ball-Man/xtream-ai-assignment-engineer"
+```
+In order to do manual and granular selection over the set of dependencies, some extras are provided. Replace `all` from the installation script above with one of:
+
+* `nb`: install the dependencies to run the notebooks.
+* `web`: install the dependencies to run the web server.
+* `all`: install all of the optional dependencies.
+
+### REST API
+For **challenge 3**, a REST API was developed using FastAPI. The API is a proof of concept implementing the possibility to upload new datasets and update existing ones, as well as the possibility to fit new models on said data and request predictions.
+
+A proof of concept caching system is used to provide asyncio-safe communication within a worker's coroutines, and memory sharing between multiple workers (NOTE: this was not completely implemented, requires the installation of redis as backend cache provider).
+
+To run the server, an installation with the `web` extra requirements is necessary (see [Package Installation](#package-installation)), then simply run:
+```bash
+uvicorn diamond.web:app
+```
+This runs the server locally on port 8000. While running, docs are automatically generated at [127.0.0.1:8000/docs](http://127.0.0.1:8000/docs).
+
+In alternative, have a look at a pregenerated version of the docs here: [ball-man.github.io/xtream-ai-assignment-engineer](https://ball-man.github.io/xtream-ai-assignment-engineer/).
+
+### Testing
+The `tests/` folder contains decent unit-test coverage for the `diamond` package, through *pytest*.
+
+Tests are not installed with the package, please clone the repo if you wish to run them. Running tests require the basic requirements of the package (satisfied through a minimal installation, see [Package Installation](#package-installation)), as well as some extra testing packages (mostly pytest). Install testing requirements with:
+```bash
+pip install -r requirements_test.txt
+```
+Run tests with:
+```bash
+# In the repository root
+python -m pytest tests
+```
+With some extra work, tests could be written for the REST API as well (through FastAPI's `TestClient`). This possibility was not explored any futher due to time constraints.
